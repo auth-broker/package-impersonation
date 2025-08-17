@@ -4,10 +4,10 @@ from urllib.parse import urlparse
 import requests
 from pydantic import AnyUrl, BaseModel, computed_field
 
-from obo_core.impersonation.schema.impersonation_exchange import (
+from ab_core.impersonation.schema.impersonation_exchange import (
     ImpersonationExchangeInteract,
 )
-from obo_core.impersonation.schema.impersonation_tool import (
+from ab_core.impersonation.schema.impersonation_tool import (
     ImpersonatorTool,
 )
 

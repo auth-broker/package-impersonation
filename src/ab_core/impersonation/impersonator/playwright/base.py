@@ -19,7 +19,7 @@ from playwright.sync_api import (
 from pydantic import BaseModel
 from uuid_extensions import uuid7
 
-from obo_core.impersonation.schema.impersonation_exchange import (
+from ab_core.impersonation.schema.impersonation_exchange import (
     ImpersonationExchangeInteract,
     ImpersonationExchangeRequest,
     ImpersonationExchangeResponse,

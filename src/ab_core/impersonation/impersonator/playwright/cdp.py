@@ -5,10 +5,10 @@ from typing import Generator, Literal, Optional, override
 from playwright.sync_api import sync_playwright
 from pydantic import AnyUrl, BaseModel, Field
 
-from obo_core.impersonation.schema.impersonation_exchange import (
+from ab_core.impersonation.schema.impersonation_exchange import (
     ImpersonationExchangeInteract,
 )
-from obo_core.impersonation.schema.impersonation_tool import (
+from ab_core.impersonation.schema.impersonation_tool import (
     ImpersonatorTool,
 )
 

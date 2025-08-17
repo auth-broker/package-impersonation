@@ -10,7 +10,7 @@ from typing import (
 
 from pydantic import BaseModel
 
-from obo_core.impersonation.schema.impersonation_exchange import (
+from ab_core.impersonation.schema.impersonation_exchange import (
     ImpersonationExchangeInteract,
     ImpersonationExchangeRequest,
     ImpersonationExchangeResponse,

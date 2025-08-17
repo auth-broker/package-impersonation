@@ -7,12 +7,12 @@ from typing import (
     override,
 )
 
-from obo_core.impersonation.schema.impersonation_exchange import (
+from ab_core.impersonation.schema.impersonation_exchange import (
     ImpersonationExchangeInteract,
     ImpersonationExchangeRequest,
     ImpersonationExchangeResponse,
 )
-from obo_core.impersonation.schema.impersonation_tool import (
+from ab_core.impersonation.schema.impersonation_tool import (
     ImpersonatorTool,
 )
 
