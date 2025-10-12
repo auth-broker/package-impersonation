@@ -1,6 +1,14 @@
-from contextlib import contextmanager
-from typing import Generator, Literal, Optional, override
+from collections.abc import AsyncGenerator, Generator
+from contextlib import (
+    asynccontextmanager,  # (import ok to add)
+    contextmanager,
+)
+from typing import (
+    Literal,
+    override,
+)
 
+from playwright.async_api import async_playwright  # (import ok to add)
 from playwright.sync_api import sync_playwright
 
 from ab_core.impersonation.schema.impersonation_exchange import (
@@ -12,6 +20,7 @@ from ab_core.impersonation.schema.impersonation_tool import (
 
 from .base import (
     PlaywrightContext,
+    PlaywrightContextAsync,
     PlaywrightImpersonatorBase,
 )
 
@@ -45,9 +54,41 @@ class PlaywrightImpersonator(PlaywrightImpersonatorBase):
             finally:
                 browser.close()
 
+    @asynccontextmanager
+    @override
+    async def init_context_async(
+        self,
+        url: str,
+    ) -> AsyncGenerator[PlaywrightContextAsync, None]:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                channel=self.browser_channel,
+                headless=False,
+                args=["--disable-blink-features=AutomationControlled"],
+            )
+            context = await browser.new_context()
+            page = await context.new_page()
+            await page.goto(url)
+            try:
+                yield PlaywrightContextAsync(
+                    browser=browser,
+                    context=context,
+                    page=page,
+                )
+            finally:
+                await browser.close()
+
     @override
     def init_interaction(
         self,
         context: PlaywrightContext,
-    ) -> Optional[ImpersonationExchangeInteract]:
+    ) -> ImpersonationExchangeInteract | None:
         return None  # browser opens in client, no interaction preparation needed
+
+    @override
+    async def init_interaction_async(
+        self,
+        context: PlaywrightContextAsync,
+    ) -> ImpersonationExchangeInteract | None:
+        # No special prep needed; mirror sync behaviour
+        return None

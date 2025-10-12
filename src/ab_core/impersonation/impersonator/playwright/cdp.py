@@ -1,7 +1,15 @@
 import urllib
-from contextlib import contextmanager
-from typing import Generator, Literal, Optional, override
+from collections.abc import AsyncGenerator, Generator
+from contextlib import (
+    asynccontextmanager,  # (import ok to add)
+    contextmanager,
+)
+from typing import (
+    Literal,
+    override,
+)
 
+from playwright.async_api import async_playwright  # (import ok to add)
 from playwright.sync_api import sync_playwright
 from pydantic import AnyUrl, BaseModel, Field
 
@@ -14,21 +22,18 @@ from ab_core.impersonation.schema.impersonation_tool import (
 
 from .base import (
     PlaywrightContext,
+    PlaywrightContextAsync,
     PlaywrightImpersonatorBase,
 )
 
 
 class CDPGUIService(BaseModel):
-    """
-    A minimal client for Browserless's session API.
-    """
+    """A minimal client for Browserless's session API."""
 
     base_url: AnyUrl  # e.g. "https://browserless-gui.matthewcoulter.dev"
 
     def with_ws(self, ws: str) -> str:
-        """
-        Applies a ws url to the gui, ensuring the client can see that particular browser session
-        """
+        """Applies a ws url to the gui, ensuring the client can see that particular browser session"""
         encoded_ws = urllib.parse.quote(ws, safe="")
         return f"{self.base_url}?ws={encoded_ws}"
 
@@ -42,9 +47,9 @@ class PlaywrightCDPImpersonator(PlaywrightImpersonatorBase):
         ...,
         description='CDP endpoint URL, e.g. "wss://your-browserless/chromium?token=..."',
     )
-    cdp_headers: Optional[dict] = Field(default=None)
-    cdp_timeout: Optional[float] = Field(default=None)
-    cdp_gui_service: Optional[CDPGUIService] = None
+    cdp_headers: dict | None = Field(default=None)
+    cdp_timeout: float | None = Field(default=None)
+    cdp_gui_service: CDPGUIService | None = None
 
     @contextmanager
     @override
@@ -75,9 +80,42 @@ class PlaywrightCDPImpersonator(PlaywrightImpersonatorBase):
                 # This will disconnect Playwright, not shut down the container
                 browser.close()
 
+    @asynccontextmanager
+    @override
+    async def init_context_async(
+        self,
+        url: str,
+    ) -> AsyncGenerator[PlaywrightContextAsync, None]:
+        async with async_playwright() as p:
+            browser = await p.chromium.connect_over_cdp(
+                self.cdp_endpoint,
+                timeout=self.cdp_timeout,
+                headers=self.cdp_headers,
+            )
+            context = await browser.new_context()
+            page = await context.new_page()
+            await page.goto(url)
+            await page.wait_for_load_state("networkidle")
+            try:
+                yield PlaywrightContextAsync(
+                    browser=browser,
+                    context=context,
+                    page=page,
+                )
+            finally:
+                await browser.close()
+
     @override
     def init_interaction(
         self,
         context: PlaywrightContext,
-    ) -> Optional[ImpersonationExchangeInteract]:
+    ) -> ImpersonationExchangeInteract | None:
         return None  # browser opens in client, no interaction preparation needed
+
+    @override
+    async def init_interaction_async(
+        self,
+        context: PlaywrightContextAsync,
+    ) -> ImpersonationExchangeInteract | None:
+        # No special prep needed; mirror sync behaviour
+        return None

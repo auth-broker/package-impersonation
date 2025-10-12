@@ -10,11 +10,6 @@ from .playwright.standard import PlaywrightImpersonator
 from .template import TemplateImpersonator
 
 Impersonator = Annotated[
-    Union[
-        PlaywrightImpersonator,
-        PlaywrightCDPImpersonator,
-        PlaywrightCDPBrowserlessImpersonator,
-        TemplateImpersonator,
-    ],
+    PlaywrightImpersonator | PlaywrightCDPImpersonator | PlaywrightCDPBrowserlessImpersonator | TemplateImpersonator,
     Discriminator("tool"),
 ]

@@ -1,6 +1,6 @@
 from abc import ABC
 from enum import StrEnum
-from typing import Annotated, Dict, Literal, Optional, Tuple
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Discriminator
 
@@ -18,7 +18,7 @@ class ImpersonationExchangeInteract(ImpersonationExchangeBase):
     event: Literal[ImpersonationExchangeType.INTERACT] = ImpersonationExchangeType.INTERACT
 
     ws_url: str
-    gui_url: Optional[str]
+    gui_url: str | None
 
 
 class ImpersonationExchangeRequest(ImpersonationExchangeBase):
@@ -26,8 +26,8 @@ class ImpersonationExchangeRequest(ImpersonationExchangeBase):
 
     url: str
     method: str
-    headers: Dict[str, str]
-    body: Optional[bytes] = None
+    headers: dict[str, str]
+    body: bytes | None = None
 
 
 class ImpersonationExchangeResponse(ImpersonationExchangeBase):
@@ -39,12 +39,12 @@ class ImpersonationExchangeResponse(ImpersonationExchangeBase):
     ok: bool
     status: int
     status_text: str
-    headers: Dict[str, str]
-    body: Optional[bytes] = None
+    headers: dict[str, str]
+    body: bytes | None = None
 
 
 ImpersonationExchange = Annotated[
-    Tuple[
+    tuple[
         ImpersonationExchangeRequest,
         ImpersonationExchangeResponse,
     ],
